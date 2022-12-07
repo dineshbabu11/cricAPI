@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FlaskBlog</title>
+</head>
+<body>
+   <h1>All Players</h1>
+    {% for player in players %}
+        <!--<br><a href = "player_score/{{ player.data }}">{{ player.name }} </a></br>-->
+        <br> {{ player.name }} --- {{ player.data }} </br>
+      {% endfor %}
+</body>
+</html>
