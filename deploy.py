@@ -11,14 +11,6 @@ cricAPI = CricAPI()
 def welcome():
     return render_template('index.html')
 
-@app.route("/players")
-def players():
-    matchid = request.args["matchid"]
-    playerList = cricAPI.players_info_no_scorecard(1, cricAPI.get_url_fromid(matchid))
-    playerList = playerList + cricAPI.players_info_no_scorecard(2, cricAPI.get_url_fromid(matchid))
-    return(render_template('players.html', players=playerList))
-
-
 @app.route("/player_score")
 def player_score():
     matchid = request.args['matchid']
@@ -35,6 +27,17 @@ def player_score():
         return (allPlayerInfo[players[0]])
     else:
         return []
+
+@app.route("/players_display")
+def players_display():
+    matchid = request.args["matchid"]
+    playerList = cricAPI.get_playing11_display(cricAPI.get_url_fromid(matchid))
+    return(render_template('players.html', players=playerList))
+
+@app.route("/players")
+def players():
+    matchid = request.args["matchid"]
+    return(cricAPI.get_playing11(cricAPI.get_url_fromid(matchid)))
 
 if __name__ == "__main__":
     app.run(port='5002', debug=True)

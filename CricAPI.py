@@ -17,7 +17,7 @@ class CricAPI:
         links = []
         for link in soup.findAll('a'):
             links.append(link.get('href'))
-        reqLink = [(id) for id in links if re.search(str(matchid), id) and re.search("live", id)][0]
+        reqLink = [(id) for id in links if re.search(str(matchid), id)][0]
         reqLink = "https://www.espncricinfo.com" + '/'.join(reqLink.split("/")[:-1]) + "/full-scorecard"
         return(reqLink)
 
@@ -60,35 +60,45 @@ class CricAPI:
         player = [(key) for key in allPlayerInfo if re.search(player_info, allPlayerInfo[key]["href"])]
         return(allPlayerInfo[player[0]])
 
+    def get_playing11_display(self, url):
+        reqLink = '/'.join(url.split("/")[:-1]) + "/match-playing-xi"
+        soup = self.init(reqLink)
+        players = soup.find_all("tbody")[0].find_all("a")
 
-    def players_info_no_scorecard(self, team, url):
-        soup = self.init(url)
+        i = 0
         playerList = []
-        playerList_noBat = []
-        players = soup.find_all("tbody")[(team-1)*2]
-        players = players.find_all("td")
-        players_noBat = [(player) for player in players if player.find("div") and player.find("div").find("strong") and player.find("div").find("strong").text and re.search("Did not bat", player.find("div").find("strong").text)]
-        if players_noBat:
-            players_noBat = players_noBat[0]
-            players_noBat = players_noBat.find_all('a')
-            for player in players_noBat:
-                if player.find('span'):
-                    playerList_noBat.append({"name": player.find('span').find('span').text.replace(",", ""), "data": player.get('href').split("/")[-1]})
-
-        j = 0
-        for i in range(0, len(players)):
-            name = players[j].text
-            if name == "Extras":
-                break
-            if not (players[j].find("a") and players[j].find("a").get("href")):
-                j = j + 1
-                continue
-            playerList.append({"name": name , "data": players[j].find("a").get("href").split("/")[-1]})
-            j = j + 8
-
-        for player in playerList_noBat:
-            playerList.append(player)
-
+        for player in players:
+            if i < 22 and player.get('href'):
+                playerList.append({"name" : player.find("span").text, "data" : player.get('href').split("/")[-1]})
+                i = i+1
         return playerList
+
+    def get_playing11(self, url):
+        reqLink = '/'.join(url.split("/")[:-1]) + "/match-playing-xi"
+        soup = self.init(reqLink)
+        players = soup.find_all("tbody")[0].find_all("a")
+        teams = soup.find_all("thead")[0].find_all("th")
+        teamList = []
+        for team in teams:
+            if team.find("span"):
+                teamList.append(team.find("span").text)
+        #print(teams)
+
+        i = 0
+        playerList = []
+        for player in players:
+            if i < 22 and player.get('href'):
+                playerList.append(player.find("span").text)
+                i = i+1
+        playerDict = [{"team" : teamList[0], "players" : playerList[0::2]}, {"team" : teamList[0], "players" : playerList[1::2]}]
+        return(playerDict)
+
+
+
+if __name__ == "__main__":
+    cricAPI = CricAPI()
+    playerList = cricAPI.get_playing11(cricAPI.get_url_fromid(1324528))
+
+
 
 
